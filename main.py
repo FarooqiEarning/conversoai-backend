@@ -1,7 +1,8 @@
-from flask import Flask, jsonify, request, redirect
+from flask import Flask, jsonify, request
 from werkzeug.exceptions import HTTPException
 from flask_cors import CORS
 from api import get_user_tokens, generate_image, getModels, completeResponse, getImage
+from system import getStatus, regenNewApiKey
 
 app = Flask(__name__)
 CORS(app, resources={
@@ -13,9 +14,19 @@ CORS(app, resources={
 }, supports_credentials=True)
 
 # Basic routes
-@app.route('/')
+@app.route("/", methods=["GET"])
 def home():
-    return redirect('https://conversoai.stylefort.store/docs')
+    return jsonify({
+        "message": "Welcome to Converso AI!",
+        "description": (
+            "Converso AI is an intelligent conversational platform designed "
+            "to provide fast, accurate, and human-like interactions. "
+            "It enables businesses and individuals to automate conversations, "
+            "answer questions, and create custom AI-powered experiences."
+        ),
+        "status": "running",
+        "version": "1.0.6"
+    })
 
 ### <--- Converso AI All Rounder --->
 @app.route('/tokens', methods=['GET'])
@@ -27,9 +38,21 @@ def get_tokens():
         return jsonify({"error": "Missing or invalid token"}), 401
     return get_user_tokens(token)  
 
+@app.route('/status', methods=['GET'])
+def status():
+    return getStatus()
+
 @app.route('/v1/models', methods=['GET'])
 def models():
-    return getModels() 
+    return getModels()
+
+@app.route('/regen-api_key', methods=['GET'])
+def regen_api_key():
+    api_key = request.headers.get('Authorization')
+    if not api_key:
+        return jsonify({'error': 'Authorization header required'}), 401
+    api_key = api_key.replace('Bearer ', '').strip()
+    return regenNewApiKey(api_key)
 
 ### <--- Converso AI API v1 --->
 @app.route('/v1/chat/completions', methods=['POST'])
