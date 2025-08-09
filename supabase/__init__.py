@@ -5,7 +5,11 @@ from random import choice
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_API_KEY = os.getenv("SUPABASE_API_KEY")
-supabase_headers = os.getenv("SUPABASE_HEADERS")
+supabase_headers = {
+    "apikey": SUPABASE_API_KEY,
+    "Authorization": f"Bearer {SUPABASE_API_KEY}",
+    "Content-Type": "application/json"
+}
 
 def supabase_get(table, params):
     url = f"{SUPABASE_URL}/rest/v1/{table}"
@@ -33,6 +37,10 @@ def models_details(type, model):
         return jsonify({"error": "Model not found"}), 404
     models = models_list[0]
     back_provider_url = os.getenv(models.get("back_provider"))
+    if type == "img":
+        back_provider_url = f"{back_provider_url}/images/generations"
+    elif type == "text":
+        back_provider_url = f"{back_provider_url}/chat/completions"
     params = {
         "provider": f"eq.{models.get("back_provider")}",
     }
@@ -54,4 +62,5 @@ def models_details(type, model):
         "back_id": models.get("back_id"),
         "back_provider": back_provider_url
     }
+    print(f"Model Data: {model_data}")
     return model_data
