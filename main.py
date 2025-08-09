@@ -1,4 +1,5 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_file
+from io import BytesIO
 from werkzeug.exceptions import HTTPException
 from flask_cors import CORS
 from api import get_user_tokens, generate_image, getModels, completeResponse, getImage
@@ -85,9 +86,10 @@ def v1_image():
         return jsonify({"type": "text", "response": "Model is required"}), 400
     return generate_image(api_key, prompt, model, n)
 
-@app.route('/generated_images/<path:id>')
+@app.route('/generated_images/<id>')
 def serve(id):
-    return getImage(id)
+    data = getImage(id)
+    return send_file(BytesIO(data), mimetype="image/jpeg")
 
 @app.errorhandler(Exception)
 def handle_error(e):

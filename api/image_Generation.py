@@ -10,7 +10,7 @@ from supabase import models_details
 from user import check_and_get, cut_tokens
 from db.info import save_generated_image
 from threading import Thread
-from flask import send_from_directory
+from vercel_blob import put
 
 def generate_image_back(prompt, model, n, provider_url, provider_apikey):
     payload = {
@@ -96,22 +96,37 @@ def generate_image(api_key ,prompt, model, IN_num=1):
                 processed_data = buffer.read()
 
             # Create a unique filename for each image
-            # Create a unique filename for each image
-            random_num = random.randint(10**6, 10**7 - 1)
-            filename = f"{request_time}{random_num}.jpeg"
+            random_num1 = random.randint(10**6, 10**7 - 1)
+            random_num2 = random.randint(10**6, 10**7 - 1)
+            filename = f"{request_time}{random_num1}{random_num2}"
             
-            # Define the path for the generated images folder
+            # Determine whether to use Vercel Blob or local storage
+            if USE_VERCEL_BLOB:
+                try:
+                    # Upload to Vercel Blob
+                    blob = put(filename, processed_data, {"access": "public", "contentType": "image/jpeg"})
+                    
+                    # Get the URL from the blob response
+                    blob_url = blob.url
+                    
+                    images.append(blob_url)
+                    return {"url": blob_url}
+                except Exception as e:
+                    print(f"Error uploading to Vercel Blob: {e}")
+                    # Fall through to local storage if Vercel Blob upload fails
+            
+            # Use local storage (either as primary method or fallback)
             output_folder = "generated_images"
             if not os.path.exists(output_folder):
                 os.makedirs(output_folder)
-
-            # Save the image to the local folder
+            
             file_path = os.path.join(output_folder, filename)
             with open(file_path, "wb") as f:
                 f.write(processed_data)
-
-            images.append(f"https://api.stylefort.store/generated_images/{filename}")
-            return {"url": f"https://api.stylefort.store/generated_images/{filename}"}
+            
+            local_url = f"https://api.stylefort.store/generated_images/{filename}"
+            images.append(local_url)
+            return {"url": local_url}
         except Exception as e:
             print(f"Error processing image: {e}")
             return {"error": str(e)}
@@ -147,4 +162,6 @@ def generate_image(api_key ,prompt, model, IN_num=1):
     return jsonify(response_data)
 
 def getImage(id):
-    return send_from_directory('generated_images', id)
+    url=f"https://9f7onqvz26sb8xlk.public.blob.vercel-storage.com/{id}"
+    data = requests.get(url).content
+    return data
