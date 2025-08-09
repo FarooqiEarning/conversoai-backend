@@ -100,33 +100,11 @@ def generate_image(api_key ,prompt, model, IN_num=1):
             random_num2 = random.randint(10**6, 10**7 - 1)
             filename = f"{request_time}{random_num1}{random_num2}"
             
-            # Determine whether to use Vercel Blob or local storage
-            if USE_VERCEL_BLOB:
-                try:
-                    # Upload to Vercel Blob
-                    blob = put(filename, processed_data, {"access": "public", "contentType": "image/jpeg"})
-                    
-                    # Get the URL from the blob response
-                    blob_url = blob.url
-                    
-                    images.append(blob_url)
-                    return {"url": blob_url}
-                except Exception as e:
-                    print(f"Error uploading to Vercel Blob: {e}")
-                    # Fall through to local storage if Vercel Blob upload fails
-            
-            # Use local storage (either as primary method or fallback)
-            output_folder = "generated_images"
-            if not os.path.exists(output_folder):
-                os.makedirs(output_folder)
-            
-            file_path = os.path.join(output_folder, filename)
-            with open(file_path, "wb") as f:
-                f.write(processed_data)
-            
-            local_url = f"https://api.stylefort.store/generated_images/{filename}"
-            images.append(local_url)
-            return {"url": local_url}
+            # Upload to Vercel Blob
+            put(filename, processed_data, {"access": "public", "contentType": "image/jpeg"})
+            blob_url = f"https://api.stylefort.store/generated_images/{filename}"
+            images.append(blob_url)
+            return {"url": blob_url}
         except Exception as e:
             print(f"Error processing image: {e}")
             return {"error": str(e)}
