@@ -1,0 +1,5 @@
+Flask==3.1.1
+requests==2.32.4
+Werkzeug==3.1.1
+Flask-Cors==4.0.0
+Pillow==10.2.0
