@@ -1,4 +1,4 @@
-from ..supabase import supabase_get, supabase_update
+from supabase import supabase_get, supabase_update
 from flask import jsonify
 
 def check_and_get(apikey):

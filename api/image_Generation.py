@@ -6,8 +6,8 @@ import datetime
 from io import BytesIO
 import os
 from PIL import Image, ImageDraw, ImageFont
-from ..supabase import models_details
-from ..user import check_and_get, cut_tokens
+from supabase import models_details
+from user import check_and_get, cut_tokens
 from threading import Thread
 from flask import send_from_directory
 
@@ -32,7 +32,7 @@ def generate_image_back(prompt, model, n, provider_url, provider_apikey):
 
 # Main Generate image function
 def generate_image(api_key ,prompt, model, IN_num=1):
-    model_data = models_details(model)
+    model_data = models_details("image", model)
     token_cost = model_data.get("tokens", 0)
     back_id = model_data.get("back_id")
     provider_apikey = model_data.get("key")

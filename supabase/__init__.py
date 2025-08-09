@@ -19,9 +19,9 @@ def supabase_update(table, params, update_data):
     resp = requests.patch(url, headers=supabase_headers, params=params, json=update_data)
     return resp.status_code == 200
 
-def models_details(model):
+def models_details(type, model):
     params = {
-        "id": f"eq.{model}", "type": "eq.text"
+        "id": f"eq.{model}", "type": f"eq.{type}"
     }
     response = requests.get(
         f"{SUPABASE_URL}/rest/v1/Models",

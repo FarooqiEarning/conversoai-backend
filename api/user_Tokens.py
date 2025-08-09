@@ -1,5 +1,5 @@
 from flask import jsonify
-from ..supabase import supabase_get
+from supabase import supabase_get
 
 def get_user_tokens(apiKey):    # 2. Query Supabase
     users = supabase_get("User", {"apikey": f"eq.{apiKey}"})

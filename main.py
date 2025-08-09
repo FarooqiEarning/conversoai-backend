@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, redirect, send_file
+from flask import Flask, jsonify, request, redirect
 from werkzeug.exceptions import HTTPException
 from flask_cors import CORS
 from api import get_user_tokens, generate_image, getModels, completeResponse, getImage
@@ -15,11 +15,7 @@ CORS(app, resources={
 # Basic routes
 @app.route('/')
 def home():
-    return redirect('https://conversoai.stylefort.store')
-
-@app.route('/v1/models', methods=['GET'])
-def models():
-    return getModels()
+    return redirect('https://conversoai.stylefort.store/docs')
 
 ### <--- Converso AI All Rounder --->
 @app.route('/tokens', methods=['GET'])
@@ -29,7 +25,11 @@ def get_tokens():
     token = auth_header.replace('Bearer', '').strip()
     if not token:
         return jsonify({"error": "Missing or invalid token"}), 401
-    return get_user_tokens(token)   
+    return get_user_tokens(token)  
+
+@app.route('/v1/models', methods=['GET'])
+def models():
+    return getModels() 
 
 ### <--- Converso AI API v1 --->
 @app.route('/v1/chat/completions', methods=['POST'])

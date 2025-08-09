@@ -1,8 +1,8 @@
 import requests
 from threading import Thread
 from flask import jsonify
-from ..supabase import models_details
-from ..user import check_and_get, cut_tokens
+from supabase import models_details
+from user import check_and_get, cut_tokens
 
 def completeResponse(api_key, data):
     user_data = check_and_get(api_key)
@@ -11,7 +11,7 @@ def completeResponse(api_key, data):
     tokens = user_data.get("tokens", 0)
 
     model=data.get("model")
-    model_data = models_details(model)
+    model_data = models_details("text", model)
     token_cost = model_data.get("tokens", 0)
     model_i = model_data.get("back_id")
     model_type = model_data.get("access")
