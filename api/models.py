@@ -1,10 +1,6 @@
 import requests
 from flask import jsonify
 import os
-import dotenv
-
-# Load environment variables from .env file
-dotenv.load_dotenv()
 
 # Configuration
 SUPABASE_URL = os.getenv("SUPABASE_URL")
