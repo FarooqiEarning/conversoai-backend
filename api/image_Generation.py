@@ -8,6 +8,7 @@ import os
 from PIL import Image, ImageDraw, ImageFont
 from supabase import models_details
 from user import check_and_get, cut_tokens
+from db.info import save_generated_image
 from threading import Thread
 from flask import send_from_directory
 
@@ -45,6 +46,7 @@ def generate_image(api_key ,prompt, model, IN_num=1):
         return jsonify({"type": "text", "response": f"{model_name} can generate up to {n} images per request."}), 400
     
     upload_urls = []
+    images = []
     # Verify API key
     user_data = check_and_get(api_key)
     id = user_data.get("id")
@@ -108,6 +110,7 @@ def generate_image(api_key ,prompt, model, IN_num=1):
             with open(file_path, "wb") as f:
                 f.write(processed_data)
 
+            images.append(f"/generated_images/{filename}")
             return {"url": f"/generated_images/{filename}"}
         except Exception as e:
             print(f"Error processing image: {e}")
@@ -140,6 +143,7 @@ def generate_image(api_key ,prompt, model, IN_num=1):
             "Creation Time": elapsed
         }
     print(response_data)
+    Thread(target=save_generated_image, args=(prompt, id, elapsed, model, images)).start()
     return jsonify(response_data)
 
 def getImage(id):

@@ -23,6 +23,11 @@ def supabase_update(table, params, update_data):
     resp = requests.patch(url, headers=supabase_headers, params=params, json=update_data)
     return resp.status_code == 200
 
+def supabase_insert(table, insert_data):
+    url = f"{SUPABASE_URL}/rest/v1/{table}"
+    resp = requests.post(url, headers=supabase_headers, json=insert_data)
+    return resp.status_code in (200, 201)
+
 def models_details(type, model):
     params = {
         "id": f"eq.{model}", "type": f"eq.{type}"
