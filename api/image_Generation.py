@@ -110,8 +110,8 @@ def generate_image(api_key ,prompt, model, IN_num=1):
             with open(file_path, "wb") as f:
                 f.write(processed_data)
 
-            images.append(f"/generated_images/{filename}")
-            return {"url": f"/generated_images/{filename}"}
+            images.append(f"https://api.stylefort.store/generated_images/{filename}")
+            return {"url": f"https://api.stylefort.store/generated_images/{filename}"}
         except Exception as e:
             print(f"Error processing image: {e}")
             return {"error": str(e)}
