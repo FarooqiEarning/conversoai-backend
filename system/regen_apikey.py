@@ -1,9 +1,8 @@
 import requests
 from flask import jsonify
-import random
-import string
 import os
 from supabase import supabase_get
+from user import generate_api_key
 
 # Configuration
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -14,12 +13,6 @@ supabase_headers = {
         "Content-Type": "application/json"
     }
 CLERK_SECRET_KEY = os.getenv("CLERK_SECRET_KEY")
-
-def generate_api_key():
-    def rand_str(length):
-        return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
-    apiKey= f"mg-{rand_str(13)}-{rand_str(10)}"
-    return apiKey
 
 def regenNewApiKey(oldApiKey):
     # Setp 1: Get User id

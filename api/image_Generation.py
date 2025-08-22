@@ -4,7 +4,6 @@ import random
 import time
 import datetime
 from io import BytesIO
-import os
 from PIL import Image, ImageDraw, ImageFont
 from supabase import models_details
 from user import check_and_get, cut_tokens
@@ -29,6 +28,8 @@ def generate_image_back(prompt, model, n, provider_url, provider_apikey):
         data = response.json()
         image_urls = [item.get('url') for item in data.get('data', [])]
         print("Images generated successfully")
+        for url in image_urls:
+            print(f" - {url}")
         return image_urls
 
 # Main Generate image function
