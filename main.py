@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request, send_file
 from io import BytesIO
 from werkzeug.exceptions import HTTPException
 from flask_cors import CORS
-from api import get_user_tokens, generate_image, getModels, completeResponse, getImage
+from api import get_user_tokens, generate_image, getModels, completeResponse, getImage, createAgent, agentResponse
 from system import getStatus, regenNewApiKey
 
 app = Flask(__name__)
@@ -55,6 +55,19 @@ def regen_api_key():
     api_key = api_key.replace('Bearer ', '').strip()
     return regenNewApiKey(api_key)
 
+@app.route('/create-agent', methods=['POST'])
+def create_agent():
+    api_key = request.headers.get('Authorization')
+    if not api_key:
+        return jsonify({'error': 'Authorization header required'}), 401
+    api_key = api_key.replace('Bearer ', '').strip()
+    data = request.json
+    agent_name = data.get("agent_name")
+    agent_description = data.get("agent_description")
+    if not agent_name or not agent_description:
+        return jsonify({'error': 'Agent name and description are required'}), 400
+    return createAgent(api_key, agent_name, agent_description)
+
 ### <--- Converso AI API v1 --->
 @app.route('/v1/chat/completions', methods=['POST'])
 def v1_completion():
@@ -85,6 +98,19 @@ def v1_image():
     if not model:
         return jsonify({"type": "text", "response": "Model is required"}), 400
     return generate_image(api_key, prompt, model, n)
+
+@app.route('/v1/agents/<agent_id>/responses', methods=['POST'])
+def agent_responses(agent_id):
+    api_key = request.headers.get('Authorization')
+    if not api_key:
+        return jsonify({"type": "text", "response": "API Key is missing"}), 488
+    api_key = api_key.replace("Bearer ", "").strip()
+    print(f"Received API Key: {api_key}")
+    data = request.json
+    prompt = data.get("prompt", "").replace("\n", "")
+    if not prompt:
+        return jsonify({"type": "text", "response": "Prompt is required"}), 400
+    return agentResponse(api_key, agent_id, prompt)
 
 @app.route('/generated_images/<id>')
 def serve(id):

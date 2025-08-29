@@ -25,8 +25,10 @@ def supabase_update(table, params, update_data):
 
 def supabase_insert(table, insert_data):
     url = f"{SUPABASE_URL}/rest/v1/{table}"
-    resp = requests.post(url, headers=supabase_headers, json=insert_data)
-    return resp.status_code in (200, 201)
+    headers = {**supabase_headers, "Prefer": "return=representation"}
+    resp = requests.post(url, headers=headers, json=insert_data)
+    data = resp.json()
+    return data
 
 def models_details(type, model):
     params = {
@@ -69,3 +71,17 @@ def models_details(type, model):
     }
     print(f"Model Data: {model_data}")
     return model_data
+
+def providerApiKey(provider):
+    params = {
+        "provider": f"eq.{provider}",
+    }
+    response = requests.get(
+        f"{SUPABASE_URL}/rest/v1/apiKeys",
+        headers=supabase_headers,
+        params=params
+    )
+    keys = response.json()
+    key = choice(keys)
+    key = key.get("key")
+    return key
