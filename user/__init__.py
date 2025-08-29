@@ -1,7 +1,8 @@
 from supabase import supabase_get, supabase_update
 from flask import jsonify
-import random
-import string
+from .user_Tokens import get_user_tokens
+from .new_user_registory import handle_user_webhook
+from .apikey import generate_api_key
 
 def check_and_get(apikey):
     users = supabase_get("User", {"apikey": f"eq.{apikey}"})
@@ -23,9 +24,3 @@ def check_and_get(apikey):
 def cut_tokens(id, role, totalTokens, usedTokens):
     if role != "Owner" and role != "Premium User":
         supabase_update("User", {"id": f"eq.{id}"}, {"Tokens": totalTokens - usedTokens})
-
-def generate_api_key():
-    def rand_str(length):
-        return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
-    apiKey= f"mg-{rand_str(13)}-{rand_str(10)}"
-    return apiKey

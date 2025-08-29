@@ -28,6 +28,17 @@ def createAgent(api_key, agent_name, agent_description):
     agent_id = add[0].get("id")
     return jsonify({"status": "Agent created successfully", "agent_id": agent_id}), 200
 
+def getAgents(api_key):
+    user_data = check_and_get(api_key)
+    user_id = user_data.get("id")
+    agents = supabase_get("Agents", {"user_id": f"eq.{user_id}"})
+    if not isinstance(agents, list):
+        agents = []
+    for agent in agents:
+        agent.pop("agent_messages", None)
+        agent.pop("user_id", None)
+    return jsonify({"agents": agents}), 200
+
 def agentResponse(api_key, agent_id, prompt):
     """
     Handle user interaction with an AI agent:
