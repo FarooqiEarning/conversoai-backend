@@ -34,6 +34,13 @@ def generate_image_back(prompt, model, n, provider_url, provider_apikey):
 
 # Main Generate image function
 def generate_image(api_key ,prompt, model, IN_num=1):
+    # Verify API key
+    user_data = check_and_get(api_key)
+    id = user_data.get("id")
+    role = user_data.get("role")
+    tokens = user_data.get("tokens", 0)
+
+    # Get Model details
     model_data = models_details("img", model)
     token_cost = model_data.get("tokens", 0)
     back_id = model_data.get("back_id")
@@ -48,11 +55,6 @@ def generate_image(api_key ,prompt, model, IN_num=1):
     
     upload_urls = []
     images = []
-    # Verify API key
-    user_data = check_and_get(api_key)
-    id = user_data.get("id")
-    role = user_data.get("role")
-    tokens = user_data.get("tokens", 0)
 
     start_time = datetime.datetime.now()
     request_time = int(time.time())
