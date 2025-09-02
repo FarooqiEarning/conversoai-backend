@@ -71,7 +71,7 @@ def agentResponse(api_key, agent_id, prompt):
     if len(messages) > 11:  # keep system + last 10
         messages = [messages[0]] + messages[-10:]
 
-    payload = {"model": "provider-3/gpt-4", "messages": messages}
+    payload = {"model": "provider-3/kimi-k2", "messages": messages}
 
     # --- Call provider API ---
     provider = "a4f"
