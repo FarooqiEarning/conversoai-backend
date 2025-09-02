@@ -5,12 +5,14 @@ from .new_user_registory import handle_user_webhook
 from .apikey import generate_api_key
 
 def check_and_get(apikey):
-    users = supabase_get("User", {"apikey": f"eq.{apikey}"})
-    # Filter users to ensure exact match (Supabase may return partial matches)
-    users = [u for u in users if u.get("apikey") == apikey]
-    if not users:
-        return jsonify({"type": "text", "response": "Invalid API Key"}), 488
-    user = users[0]
+    params = {
+        "apikey": f"eq.{apikey}"
+    }
+    user_data = supabase_get("User", params)
+    user_data = [u for u in user_data if u.get("apikey") == apikey]
+    if not user_data:
+        return {"type": "text", "response": "Invalid API Key"}, 401
+    user = user_data[0]
     id=user.get("id")
     role=user.get("Role")
     tokens = user.get("Tokens", 0)
