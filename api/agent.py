@@ -1,6 +1,6 @@
 import requests
 from threading import Thread
-from flask import jsonify
+from flask import jsonify, send_file
 from supabase import providerApiKey, supabase_insert, supabase_update, supabase_get
 import os
 from user import check_and_get, cut_tokens
@@ -39,6 +39,41 @@ def getAgents(api_key):
         agent.pop("user_id", None)
     return jsonify({"agents": agents}), 200
 
+from io import BytesIO
+from flask import send_file, jsonify
+import requests
+
+def speak_and_return(Text, Gender, e_apikey):
+    if Gender == "male":
+        VoiceId = "bUTE2M5LdnqaUCd5tJB3"
+    elif Gender == "female":
+        VoiceId = "ulZgFXalzbrnPUGQGs0S"
+
+    Url = f"https://api.elevenlabs.io/v1/text-to-speech/{VoiceId}?output_format=mp3_44100_128"
+    Headers = {
+        "xi-api-key": e_apikey,
+        "Content-Type": "application/json"
+    }
+    Data = {
+        "text": Text,
+        "model_id": "eleven_v3"
+    }
+
+    response = requests.post(Url, headers=Headers, json=Data)
+    print(f"ElevenLabs TTS response status: {response.status_code}")
+
+    if response.status_code == 200:
+        audio_bytes = BytesIO(response.content)
+        audio_bytes.seek(0)
+        return send_file(
+            audio_bytes,
+            mimetype="audio/mp3",
+            as_attachment=True,
+            download_name="response.mp3"
+        )
+    else:
+        return jsonify({"error": "Failed to generate speech"}), 500
+
 def agentResponse(api_key, agent_id, prompt):
     """
     Handle user interaction with an AI agent:
@@ -62,6 +97,9 @@ def agentResponse(api_key, agent_id, prompt):
         return jsonify({"error": "Agent not found"}), 404
 
     agent_data = agent_list[0]
+    speak = agent_data.get("speak", False)
+    gender = agent_data.get("gender", "male")
+    elven_api_key = agent_data.get("eleven_api_key", "")
     if agent_data.get("user_id") != user_id:
         return jsonify({"error": "You do not own this agent"}), 404
 
@@ -110,7 +148,11 @@ def agentResponse(api_key, agent_id, prompt):
         update = {"agent_messages": messages}
         supabase_update("Agents", params, update)
         cut_tokens(user_id, role, tokens, 5)
-
     Thread(target=background_tasks, daemon=True).start()
 
-    return jsonify(response)
+    print(f"Speak: {speak}")
+    if speak:
+        print(f"Generating speech with ElevenLabs")
+        return speak_and_return(assistant_reply, gender, elven_api_key)
+    else:
+        return jsonify(response)
