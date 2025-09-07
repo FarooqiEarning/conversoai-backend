@@ -105,7 +105,7 @@ def generate_image(api_key ,prompt, model, IN_num=1):
             
             # Upload to Vercel Blob
             put(filename, processed_data, {"access": "public", "contentType": "image/jpeg"})
-            blob_url = f"https://api.stylefort.store/generated_images/{filename}"
+            blob_url = f"https://api.conversoai.biz/generated_images/{filename}"
             images.append(blob_url)
             return {"url": blob_url}
         except Exception as e:
